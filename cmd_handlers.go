@@ -53,6 +53,26 @@ func handlerRegisterUser(s *state, cmd command) error {
 	return nil
 }
 
+func handlerGetUsers(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return fmt.Errorf("No arguments expected")
+	}
+
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("Failed to get users: %w", err)
+	}
+	for _, user := range users {
+		fmt.Printf("* %s%s\n", user.Name, func() string {
+			if user.Name == s.cfg.CurrentUserName {
+				return " (current)"
+			}
+			return ""
+		}())
+	}
+	return nil
+}
+
 func handlerReset(s *state, cmd command) error {
 	if len(cmd.args) != 0 {
 		return fmt.Errorf("No arguments expected")
