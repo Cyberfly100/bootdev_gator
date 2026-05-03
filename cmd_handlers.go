@@ -52,3 +52,15 @@ func handlerRegisterUser(s *state, cmd command) error {
 	}
 	return nil
 }
+
+func handlerReset(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return fmt.Errorf("No arguments expected")
+	}
+	err := s.db.Reset(context.Background())
+	if err != nil {
+		return fmt.Errorf("Failed to reset database: %w", err)
+	}
+	fmt.Println("Database reset")
+	return nil
+}
