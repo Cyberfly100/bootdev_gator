@@ -73,6 +73,25 @@ func handlerGetUsers(s *state, cmd command) error {
 	return nil
 }
 
+func handlerAgg(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return fmt.Errorf("No arguments expected")
+	}
+	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return fmt.Errorf("Failed to fetch feed: %w", err)
+	}
+	// fmt.Printf("Feed Title: %s\n", feed.Channel.Title)
+	// fmt.Printf("Feed Description: %s\n", feed.Channel.Description)
+	// fmt.Printf("Number of Items: %d\n", len(feed.Channel.Item))
+	// for _, item := range feed.Channel.Item {
+	// 	fmt.Printf("- %s\n", item.Title)
+	// 	fmt.Printf("  Description: %s\n", item.Description)
+	// }
+	fmt.Printf("Feed: %+v\n", feed)
+	return nil
+}
+
 func handlerReset(s *state, cmd command) error {
 	if len(cmd.args) != 0 {
 		return fmt.Errorf("No arguments expected")
