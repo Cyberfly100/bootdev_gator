@@ -45,7 +45,7 @@ func handlerRegisterUser(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("Failed to create user: %w", err)
 	}
-	fmt.Printf("User created.ID: %s\nName: %s\nCreatedAt: %s\nUpdatedAt: %s", user.ID, user.Name, user.CreatedAt, user.UpdatedAt)
+	fmt.Printf("User created.\n  ID: %s\n  Name: %s\n  CreatedAt: %s\n  UpdatedAt: %s", user.ID, user.Name, user.CreatedAt, user.UpdatedAt)
 	err = s.cfg.SetUser(username)
 	if err != nil {
 		return fmt.Errorf("Failed to set user: %w", err)
@@ -101,5 +101,33 @@ func handlerReset(s *state, cmd command) error {
 		return fmt.Errorf("Failed to reset database: %w", err)
 	}
 	fmt.Println("Database reset")
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.args) != 2 {
+		return fmt.Errorf("Feed name and URL are required")
+	}
+	feedName := cmd.args[0]
+	feedURL := cmd.args[1]
+
+	currentUser, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		return fmt.Errorf("Failed to get current user: %w", err)
+	}
+
+	feedParams := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      feedName,
+		Url:       feedURL,
+		UserID:    currentUser.ID,
+	}
+	feed, err := s.db.CreateFeed(context.Background(), feedParams)
+	if err != nil {
+		return fmt.Errorf("Failed to create feed: %w", err)
+	}
+	fmt.Printf("Feed created.\n  ID: %s\n  Name: %s\n  URL: %s\n  CreatedAt: %s\n  UpdatedAt: %s\n  User ID: %s", feed.ID, feed.Name, feed.Url, feed.CreatedAt, feed.UpdatedAt, feed.UserID)
 	return nil
 }
