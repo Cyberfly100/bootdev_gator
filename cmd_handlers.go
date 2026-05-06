@@ -131,3 +131,21 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Printf("Feed created.\n  ID: %s\n  Name: %s\n  URL: %s\n  CreatedAt: %s\n  UpdatedAt: %s\n  User ID: %s", feed.ID, feed.Name, feed.Url, feed.CreatedAt, feed.UpdatedAt, feed.UserID)
 	return nil
 }
+
+func handlerGetFeeds(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return fmt.Errorf("No arguments expected")
+	}
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("Failed to get feeds: %w", err)
+	}
+	for _, feed := range feeds {
+		username, err := s.db.GetUserFromID(context.Background(), feed.UserID)
+		if err != nil {
+			return fmt.Errorf("Failed to get user from ID: %w", err)
+		}
+		fmt.Printf("=== Feed %s ===\n  URL: %s\n  User name: %s\n", feed.Name, feed.Url, username)
+	}
+	return nil
+}
