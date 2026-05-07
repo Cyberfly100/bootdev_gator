@@ -9,6 +9,7 @@
 *.dylib
 
 bootdev_gator
+startDB.sh
 # Test binary, built with `go test -c`
 *.test
 
