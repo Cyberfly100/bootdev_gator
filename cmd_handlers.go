@@ -74,21 +74,18 @@ func handlerGetUsers(s *state, cmd command) error {
 }
 
 func handlerAgg(s *state, cmd command) error {
-	if len(cmd.args) != 0 {
-		return fmt.Errorf("No arguments expected")
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("time between requests is required")
 	}
-	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	timeBetweenRequests, err := time.ParseDuration(cmd.args[0])
 	if err != nil {
-		return fmt.Errorf("Failed to fetch feed: %w", err)
+		return fmt.Errorf("Failed to parse time between requests: %w", err)
 	}
-	// fmt.Printf("Feed Title: %s\n", feed.Channel.Title)
-	// fmt.Printf("Feed Description: %s\n", feed.Channel.Description)
-	// fmt.Printf("Number of Items: %d\n", len(feed.Channel.Item))
-	// for _, item := range feed.Channel.Item {
-	// 	fmt.Printf("- %s\n", item.Title)
-	// 	fmt.Printf("  Description: %s\n", item.Description)
-	// }
-	fmt.Printf("Feed: %+v\n", feed)
+	fmt.Printf("Collecting feeds every %s\n", timeBetweenRequests)
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
+	}
 	return nil
 }
 
