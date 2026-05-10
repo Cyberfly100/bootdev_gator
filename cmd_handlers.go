@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/cyberfly100/bootdev_gator/internal/database"
@@ -219,5 +220,31 @@ func handlerUnfollowFeed(s *state, cmd command, currentUser database.User) error
 		return fmt.Errorf("Failed to delete feed follow: %w", err)
 	}
 	fmt.Printf("Unfollowed feed %s\n", feed.Name)
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command, currentUser database.User) error {
+	limit := 2
+	if len(cmd.args) > 0 {
+		num, err := strconv.ParseInt(cmd.args[0], 10, 32)
+		if err != nil {
+			return fmt.Errorf("Failed to parse limit: %w", err)
+		}
+		limit = int(num)
+	}
+
+	params := database.GetPostsForUserParams{
+		UserID: currentUser.ID,
+		Limit:  int32(limit),
+	}
+	posts, err := s.db.GetPostsForUser(context.Background(), params)
+	if err != nil {
+		return fmt.Errorf("Failed to get posts for user: %w", err)
+	}
+
+	for _, post := range posts {
+		fmt.Printf("=== %s ===\n  URL: %s\n  Published at: %s\n  Description: %s\n", post.Title, post.Url, post.PublishedAt.Time, post.Description.String)
+	}
+
 	return nil
 }
