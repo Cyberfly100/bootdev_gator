@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/cyberfly100/bootdev_gator/internal/database"
 )
@@ -14,12 +12,16 @@ func scrapeFeeds(s *state) error {
 	if err != nil {
 		return fmt.Errorf("Failed to get next feed to fetch: %w", err)
 	}
-	nullableTime := sql.NullTime{Time: time.Now(), Valid: true}
-	markFeedFetchedParams := database.MarkFeedFetchedParams{
-		LastFetchedAt: nullableTime,
-		ID:            feed.ID,
+
+	err = scrapeFeed(s.db, feed)
+	if err != nil {
+		return fmt.Errorf("Failed to scrape feed: %w", err)
 	}
-	err = s.db.MarkFeedFetched(context.Background(), markFeedFetchedParams)
+	return nil
+}
+
+func scrapeFeed(db *database.Queries, feed database.Feed) error {
+	_, err := db.MarkFeedFetched(context.Background(), feed.ID)
 	if err != nil {
 		return fmt.Errorf("Failed to mark feed as fetched: %w", err)
 	}
